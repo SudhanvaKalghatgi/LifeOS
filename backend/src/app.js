@@ -10,6 +10,8 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 
 // ✅ IMPORT MODULE ROUTES
 import userRoutes from "./modules/users/user.routes.js";
+import taskRoutes from "./modules/tasks/task.routes.js";
+
 
 export const app = express();
 
@@ -36,6 +38,8 @@ app.get("/api/v1/health", (req, res) => {
 
 // ✅ MODULE ROUTES (ADD ALL MODULES LIKE THIS)
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/tasks", taskRoutes);
+
 
 // ✅ ERROR MIDDLEWARE LAST (ALWAYS)
 app.use(errorHandler);
