@@ -8,13 +8,18 @@ import { ENV } from "./config/env.js";
 import { ApiResponse } from "./utils/ApiResponse.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
+// ✅ IMPORT MODULE ROUTES
+import userRoutes from "./modules/users/user.routes.js";
+
 export const app = express();
 
+// ✅ CORE MIDDLEWARES
 app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
+// ✅ CORS CONFIG
 app.use(
   cors({
     origin: ENV.CORS_ORIGIN,
@@ -22,10 +27,15 @@ app.use(
   })
 );
 
-//  health route (temporary but useful)
+// ✅ HEALTH ROUTE
 app.get("/api/v1/health", (req, res) => {
-  return res.status(200).json(new ApiResponse(200, { ok: true }, "LifeOS OK ✅"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { ok: true }, "LifeOS OK ✅"));
 });
 
-//  error middleware LAST
+// ✅ MODULE ROUTES (ADD ALL MODULES LIKE THIS)
+app.use("/api/v1/users", userRoutes);
+
+// ✅ ERROR MIDDLEWARE LAST (ALWAYS)
 app.use(errorHandler);
