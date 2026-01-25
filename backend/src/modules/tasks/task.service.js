@@ -45,10 +45,8 @@ export const listTasks = async ({ userId, filters, options }) => {
     query.dueDate = { $lt: new Date() };
     query.status = { $ne: "done" };
     query.isArchived = false;
-  }
-
-  // dueDate range
-  if (filters.from || filters.to) {
+  } else if (filters.from || filters.to) {
+    // dueDate range (mutually exclusive with overdue)
     query.dueDate = {};
     if (filters.from) query.dueDate.$gte = new Date(filters.from);
     if (filters.to) query.dueDate.$lte = new Date(filters.to);
