@@ -13,7 +13,9 @@ import {
 const router = Router();
 
 // DEV AUTH (replace with Clerk later)
-router.use(mockAuth);
+if (ENV.NODE_ENV !== "production") {
+  router.use(mockAuth);
+}
 
 router.post("/", createHabitController);
 router.get("/", listHabitsController);
