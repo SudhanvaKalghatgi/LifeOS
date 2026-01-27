@@ -13,7 +13,7 @@ import userRoutes from "./modules/users/user.routes.js";
 import taskRoutes from "./modules/tasks/task.routes.js";
 import habitRoutes from "./modules/habits/habit.routes.js";
 import expenseRoutes from "./modules/expenses/expense.routes.js";
-
+import expenseReportRoutes from "./modules/reports/expenses/expenseReport.routes.js";
 
 export const app = express();
 
@@ -43,7 +43,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/habits", habitRoutes);
 app.use("/api/v1/expenses", expenseRoutes);
-
+app.use("/api/v1/reports/expenses", expenseReportRoutes);
 
 //  ERROR MIDDLEWARE LAST (ALWAYS)
 app.use(errorHandler);
