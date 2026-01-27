@@ -47,10 +47,12 @@ const getTaskSummary = async (userId) => {
     }),
 
     Task.countDocuments({
-      userId,
-      completed: true,
-      isArchived: false,
-    }),
+  userId,
+  completed: true,
+  createdAt: { $gte: start, $lte: end },
+  isArchived: false,
+}),
+
 
     Task.countDocuments({
       userId,
@@ -78,11 +80,11 @@ const getTaskSummary = async (userId) => {
 const getHabitSummary = async (userId) => {
   const { start, end } = getLast7DaysRange();
 
-  const habits = await Habit.find({
+   const habits = await Habit.find({
     userId,
     isArchived: false,
   });
-
+  const habitIds = habits.map((h) => h._id);
   if (habits.length === 0) {
     return {
       total: 0,
@@ -90,11 +92,11 @@ const getHabitSummary = async (userId) => {
       mostMissed: null,
     };
   }
-
   const logs = await HabitLog.aggregate([
     {
       $match: {
         userId,
+        habitId: { $in: habitIds },
         date: { $gte: start, $lte: end },
       },
     },
@@ -166,8 +168,8 @@ const getExpenseSummary = async (userId) => {
     { $sort: { total: -1 } },
   ]);
 
-  const totalSpent = result.reduce((sum, r) => sum + r.total, 0);
-  const topCategory = result[0]?. _id || null;
+ const totalSpent = result.reduce((sum, r) => sum + r.total, 0);
+  const topCategory = result[0]?._id || null;
 
   return {
     totalSpent,
