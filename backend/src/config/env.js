@@ -9,4 +9,8 @@ export const ENV = {
   MONGO_URI: process.env.MONGO_URI || "",
 
   CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+
+  // 🔥 Automation / Redis
+  ENABLE_AUTOMATION: process.env.ENABLE_AUTOMATION === "true",
+  REDIS_URL: process.env.REDIS_URL || "",
 };
