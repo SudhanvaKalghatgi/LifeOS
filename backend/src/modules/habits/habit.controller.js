@@ -17,6 +17,7 @@ import {
   updateHabitById,
   upsertHabitLog,
   getHabitLogsInRange,
+  getTodayLogs,
 } from "./habit.service.js";
 
 /**
@@ -103,6 +104,30 @@ export const archiveHabitController = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, updated, "Habit archived ✅"));
+});
+
+/**
+ * GET /api/v1/habits/today
+ * Returns all habit logs for today (completed status per habit)
+ */
+export const getTodayLogsController = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  if (!userId) throw new ApiError(401, "Unauthorized: userId missing");
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const logs = await getTodayLogs({ userId, date: today });
+
+  // Return a map of habitId -> completed for easy client-side consumption
+  const completionMap = {};
+  for (const log of logs) {
+    completionMap[log.habitId.toString()] = log.completed;
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, completionMap, "Today's logs fetched ✅"));
 });
 
 /**

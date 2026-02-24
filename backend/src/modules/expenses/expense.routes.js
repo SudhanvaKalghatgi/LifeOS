@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { mockAuth } from "../../middlewares/mockAuth.js";
+import { requireAuth } from "../../middlewares/requireAuth.js";
 
 import {
   createExpenseController,
@@ -11,8 +11,8 @@ import {
 
 const router = Router();
 
-// DEV AUTH (replace with Clerk later)
-router.use(mockAuth);
+
+router.use(requireAuth);
 
 router.post("/", createExpenseController);
 router.get("/", listExpensesController);

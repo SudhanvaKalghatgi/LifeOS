@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { mockAuth } from "../../middlewares/mockAuth.js";
+import { requireAuth } from "../../middlewares/requireAuth.js";
 
 import {
   createHabitController,
@@ -8,15 +8,17 @@ import {
   archiveHabitController,
   habitCheckinController,
   habitStatsController,
+  getTodayLogsController,
 } from "./habit.controller.js";
 
 const router = Router();
 
-// ✅ DEV AUTH (replace with Clerk later)
-router.use(mockAuth);
+
+router.use(requireAuth);
 
 router.post("/", createHabitController);
 router.get("/", listHabitsController);
+router.get("/today", getTodayLogsController);
 
 router.patch("/:id", updateHabitController);
 router.patch("/:id/archive", archiveHabitController);

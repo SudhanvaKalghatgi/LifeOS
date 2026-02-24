@@ -8,10 +8,11 @@ export const ENV = {
 
   MONGO_URI: process.env.MONGO_URI || "",
 
-  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
+  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:3000",
 
   // 🔥 Automation / Redis
   ENABLE_AUTOMATION: process.env.ENABLE_AUTOMATION === "true",
   REDIS_URL: process.env.REDIS_URL || "",
-  GEMINI_API_KEY: process.env.GEMINI_API_KEY
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY
 };

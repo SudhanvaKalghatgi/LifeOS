@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { mockAuth } from "../../middlewares/mockAuth.js";
+import { requireAuth } from "../../middlewares/requireAuth.js";
 
 import { dashboardSummaryController } from "./dashboard.controller.js";
 
 const router = Router();
 
-// DEV auth (replace with Clerk later)
-router.use(mockAuth);
+
+router.use(requireAuth);
 
 router.get("/summary", dashboardSummaryController);
 
