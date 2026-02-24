@@ -33,21 +33,10 @@ const calculateProductivityScore = ({
 };
 
 /**
- * Generate weekly report
+ * Generate weekly report (atomic, race-condition safe)
  */
 export const generateWeeklyReport = async (userId) => {
   const { start, end } = getWeeklyPeriod();
-
-  // Prevent duplicate reports
-  const existing = await WeeklyReport.findOne({
-    userId,
-    periodStart: start,
-    periodEnd: end,
-  });
-
-  if (existing) {
-    return existing;
-  }
 
   /*
    * TASK STATS
@@ -89,7 +78,7 @@ export const generateWeeklyReport = async (userId) => {
     completedAt: { $gte: start, $lte: end },
   });
 
-  const habitsExpected = 7; // basic version (can improve later)
+  const habitsExpected = 7;
 
   const habitConsistencyRate =
     habitsExpected === 0
@@ -117,7 +106,10 @@ export const generateWeeklyReport = async (userId) => {
 
   const totalExpenses = expenseStats?.total || 0;
 
-  const averagePerDay = Math.round(totalExpenses / 7);
+  const averagePerDay =
+    totalExpenses === 0
+      ? 0
+      : Math.round(totalExpenses / 7);
 
   /*
    * PRODUCTIVITY SCORE
@@ -128,9 +120,9 @@ export const generateWeeklyReport = async (userId) => {
   });
 
   /*
-   * CREATE REPORT
+   * REPORT DATA OBJECT
    */
-  const report = await WeeklyReport.create({
+  const reportData = {
     userId,
 
     periodStart: start,
@@ -154,7 +146,25 @@ export const generateWeeklyReport = async (userId) => {
     },
 
     productivityScore,
-  });
+  };
+
+  /*
+   * ATOMIC UPSERT (prevents duplicate key race condition)
+   */
+  const report = await WeeklyReport.findOneAndUpdate(
+    {
+      userId,
+      periodStart: start,
+      periodEnd: end,
+    },
+    {
+      $setOnInsert: reportData,
+    },
+    {
+      upsert: true,
+      new: true,
+    }
+  );
 
   return report;
 };
