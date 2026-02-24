@@ -149,47 +149,40 @@ export const generateWeeklyReport = async (userId) => {
     productivityScore,
   };
 
-/*
- * ATOMIC UPSERT (prevents duplicate key race condition)
- */
+  /*
+   * UPSERT — always recalculate stats and regenerate AI insights on every call
+   */
 
-let report = await WeeklyReport.findOneAndUpdate(
-  {
-    userId,
-    periodStart: start,
-    periodEnd: end,
-  },
-  {
-    $setOnInsert: reportData,
-  },
-  {
-    upsert: true,
-    new: true,
-  }
-);
+  let report = await WeeklyReport.findOneAndUpdate(
+    {
+      userId,
+      periodStart: start,
+      periodEnd: end,
+    },
+    {
+      $set: reportData,          // always overwrite with fresh aggregated stats
+      $unset: { aiInsights: "" } // clear old insights so they get regenerated
+    },
+    {
+      upsert: true,
+      new: true,
+    }
+  );
 
-/*
- * Generate AI insights ONLY if not already present
- */
-  if (!report.aiInsights) {
-
+  /*
+   * Always regenerate AI insights for fresh analysis
+   */
   console.log(`🤖 Generating AI insights for user: ${userId}`);
 
   const aiInsights = await generateWeeklyAIInsights(report);
 
   if (aiInsights) {
-
     report.aiInsights = aiInsights;
-
     await report.save();
-
     console.log(`✅ AI insights generated for user: ${userId}`);
-
   }
 
-}
-
-return report;
+  return report;
 };
 
 /**

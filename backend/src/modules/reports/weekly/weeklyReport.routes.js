@@ -5,14 +5,14 @@ import {
   getReportHistory,
 } from "./weeklyReport.controller.js";
 
-import { mockAuth } from "../../../middlewares/mockAuth.js";
+import { requireAuth } from "../../../middlewares/requireAuth.js";
 
 const router = express.Router();
 
 /**
  * Protect all routes
  */
-router.use(mockAuth);
+router.use(requireAuth);
 
 /**
  * Routes

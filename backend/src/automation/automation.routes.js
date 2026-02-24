@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { mockAuth } from "../middlewares/mockAuth.js";
+import { requireAuth } from "../middlewares/requireAuth.js";
 
 import { triggerWeeklyReport } from "./automation.controller.js";
 
 const router = Router();
 
-// DEV auth only
-router.use(mockAuth);
+
+router.use(requireAuth);
 
 router.post("/weekly-report", triggerWeeklyReport);
 
