@@ -8,7 +8,7 @@ import { ENV } from "./config/env.js";
 import { ApiResponse } from "./utils/ApiResponse.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
-//  IMPORT MODULE ROUTES
+//  MODULE ROUTES
 import userRoutes from "./modules/users/user.routes.js";
 import taskRoutes from "./modules/tasks/task.routes.js";
 import habitRoutes from "./modules/habits/habit.routes.js";
@@ -16,7 +16,7 @@ import expenseRoutes from "./modules/expenses/expense.routes.js";
 import expenseReportRoutes from "./modules/reports/expenses/expenseReport.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 import automationRoutes from "./automation/automation.routes.js";
-
+import weeklyReportRoutes from "./modules/reports/weekly/weeklyReport.routes.js";
 
 export const app = express();
 
@@ -41,7 +41,7 @@ app.get("/api/v1/health", (req, res) => {
     .json(new ApiResponse(200, { ok: true }, "LifeOS OK ✅"));
 });
 
-//  MODULE ROUTES (ADD ALL MODULES LIKE THIS)
+//  MODULE ROUTES 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/habits", habitRoutes);
@@ -49,6 +49,7 @@ app.use("/api/v1/expenses", expenseRoutes);
 app.use("/api/v1/reports/expenses", expenseReportRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/automation", automationRoutes);
+app.use("/api/v1/reports/weekly", weeklyReportRoutes);
 
-//  ERROR MIDDLEWARE LAST (ALWAYS)
+//  ERROR MIDDLEWARE 
 app.use(errorHandler);

@@ -1,12 +1,26 @@
+import { generateWeeklyReport } from "../../modules/reports/weekly/weeklyReport.service.js";
+
+/**
+ * BullMQ weekly report job
+ */
 export const weeklyReportJob = async (job) => {
-  const { userId } = job.data;
+  try {
+    const { userId } = job.data;
 
-  console.log(`🧠 [JOB] Generating weekly report for user: ${userId}`);
+    console.log(`🧠 [JOB] Generating weekly report for user: ${userId}`);
 
-  // Later:
-  // - fetch dashboard summary
-  // - build AI prompt
-  // - store AI-generated report
+    const report = await generateWeeklyReport(userId);
 
-  return { success: true };
+    console.log(
+      `✅ Weekly report generated for user: ${userId} | Productivity Score: ${report.productivityScore}`
+    );
+
+    return report;
+
+  } catch (error) {
+
+    console.error("❌ Weekly report generation failed:", error);
+
+    throw error;
+  }
 };
