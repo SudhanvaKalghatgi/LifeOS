@@ -75,6 +75,10 @@ const weeklyReportSchema = new mongoose.Schema(
       default: 0,
       index: true,
     },
+    aiInsights: {
+      type: Object,
+      default: null,
+    },
 
     meta: {
       type: Object,

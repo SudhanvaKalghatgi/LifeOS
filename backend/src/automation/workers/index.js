@@ -1,44 +1,34 @@
 import { Worker } from "bullmq";
 import { ENV } from "../../config/env.js";
+import { connectDB } from "../../config/db.js";
 
 import { weeklyReportJob } from "../jobs/weeklyReport.job.js";
 import { dailyReminderJob } from "../jobs/dailyReminder.job.js";
 
-// Correct boolean check
-if (!ENV.ENABLE_AUTOMATION) {
-  console.log("🚫 Automation workers disabled");
-  process.exit(0);
-}
+const startWorkers = async () => {
 
-if (!ENV.REDIS_URL) {
-  console.error("❌ REDIS_URL not configured");
-  process.exit(1);
-}
+  if (!ENV.ENABLE_AUTOMATION) {
+    console.log("🚫 Automation workers disabled");
+    process.exit(0);
+  }
 
-const connection = {
-  url: ENV.REDIS_URL,
+  if (!ENV.REDIS_URL) {
+    console.error("❌ REDIS_URL not configured");
+    process.exit(1);
+  }
+
+  // CONNECT MONGODB FIRST
+  await connectDB();
+
+  const connection = {
+    url: ENV.REDIS_URL,
+  };
+
+  new Worker("weekly-report", weeklyReportJob, { connection });
+
+  new Worker("daily-reminder", dailyReminderJob, { connection });
+
+  console.log("✅ Automation workers started");
 };
 
-// Create workers
-const weeklyReportWorker = new Worker(
-  "weekly-report",
-  weeklyReportJob,
-  { connection }
-);
-
-const dailyReminderWorker = new Worker(
-  "daily-reminder",
-  dailyReminderJob,
-  { connection }
-);
-
-// Optional but recommended: error logging
-weeklyReportWorker.on("error", (err) => {
-  console.error("❌ Weekly Report Worker Error:", err);
-});
-
-dailyReminderWorker.on("error", (err) => {
-  console.error("❌ Daily Reminder Worker Error:", err);
-});
-
-console.log("✅ Automation workers started");
+startWorkers();
