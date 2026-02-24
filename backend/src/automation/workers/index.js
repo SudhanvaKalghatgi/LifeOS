@@ -1,34 +1,93 @@
 import { Worker } from "bullmq";
 import { ENV } from "../../config/env.js";
+
 import { connectDB } from "../../config/db.js";
 
 import { weeklyReportJob } from "../jobs/weeklyReport.job.js";
 import { dailyReminderJob } from "../jobs/dailyReminder.job.js";
 
+/**
+ * Start automation workers safely
+ */
 const startWorkers = async () => {
+  try {
+    // Do not start workers if automation disabled
+    if (!ENV.ENABLE_AUTOMATION) {
+      console.log("🚫 Automation workers disabled");
+      process.exit(0);
+    }
 
-  if (!ENV.ENABLE_AUTOMATION) {
-    console.log("🚫 Automation workers disabled");
-    process.exit(0);
-  }
+    if (!ENV.REDIS_URL) {
+      throw new Error("REDIS_URL is missing in environment variables");
+    }
 
-  if (!ENV.REDIS_URL) {
-    console.error("❌ REDIS_URL not configured");
+    // Ensure MongoDB connection before starting workers
+    await connectDB();
+
+    const connection = {
+      url: ENV.REDIS_URL,
+    };
+
+    /**
+     * Weekly Report Worker
+     */
+    new Worker(
+      "weekly-report",
+      async (job) => {
+        try {
+          await weeklyReportJob(job);
+        } catch (error) {
+          console.error(
+            "❌ Weekly Report Worker Job Error:",
+            error
+          );
+          throw error;
+        }
+      },
+      { connection }
+    );
+
+    /**
+     * Daily Reminder Worker
+     */
+    new Worker(
+      "daily-reminder",
+      async (job) => {
+        try {
+          await dailyReminderJob(job);
+        } catch (error) {
+          console.error(
+            "❌ Daily Reminder Worker Job Error:",
+            error
+          );
+          throw error;
+        }
+      },
+      { connection }
+    );
+
+    console.log("✅ Automation workers started");
+
+  } catch (error) {
+
+    console.error(
+      "❌ Failed to start automation workers:",
+      error
+    );
+
     process.exit(1);
   }
-
-  // CONNECT MONGODB FIRST
-  await connectDB();
-
-  const connection = {
-    url: ENV.REDIS_URL,
-  };
-
-  new Worker("weekly-report", weeklyReportJob, { connection });
-
-  new Worker("daily-reminder", dailyReminderJob, { connection });
-
-  console.log("✅ Automation workers started");
 };
 
-startWorkers();
+/**
+ * SAFE startup invocation with rejection handling
+ */
+startWorkers().catch((error) => {
+
+  console.error(
+    "❌ Worker startup fatal error:",
+    error
+  );
+
+  process.exit(1);
+});
