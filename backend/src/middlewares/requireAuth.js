@@ -9,11 +9,11 @@ export const requireAuth = asyncHandler(async (req, res, next) => {
     if (err) {
       // Log only the message — never the full error object which may contain tokens
       console.warn(`[Auth] Clerk verification failed: ${err.message ?? "unknown"}`);
-      throw new ApiError(401, "Unauthorized");
+      return next(new ApiError(401, "Unauthorized"));
     }
 
     if (!req.auth || !req.auth.userId) {
-      throw new ApiError(401, "Unauthorized");
+      return next(new ApiError(401, "Unauthorized"));
     }
 
     req.user = {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus, Check, RefreshCw, Trash2, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -17,25 +18,30 @@ const Habits = () => {
     const [habits, setHabits] = useState<Habit[]>([]);
     const [newHabitName, setNewHabitName] = useState('');
     const [loading, setLoading] = useState(true);
-
-    // For testing UI, we'll store today's completed habit IDs
     const [completedToday, setCompletedToday] = useState<Record<string, boolean>>({});
+    const location = useLocation();
 
-    const fetchHabits = async () => {
+    const fetchHabits = useCallback(async () => {
         try {
-            const { data } = await apiClient.get('/habits');
-            setHabits(data.data);
-            // In a real app we'd fetch today's logs to populate completedToday
+            // Fetch habits and today's completion logs in parallel
+            const [habitsRes, todayRes] = await Promise.all([
+                apiClient.get('/habits'),
+                apiClient.get('/habits/today'),
+            ]);
+            setHabits(habitsRes.data.data);
+            // Seed completedToday from server so already-done items are shown correctly
+            setCompletedToday(todayRes.data.data ?? {});
         } catch (error) {
             console.error('Failed to fetch habits:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
+    // Re-fetch every time the user navigates to /habits (matches Dashboard/Tasks pattern)
     useEffect(() => {
         fetchHabits();
-    }, []);
+    }, [location.pathname, fetchHabits]);
 
     const handleCreateHabit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,13 +58,13 @@ const Habits = () => {
 
     const handleCheckin = async (id: string, currentlyCompleted: boolean) => {
         const isCompleted = !currentlyCompleted;
+        // Optimistic update
+        setCompletedToday(prev => ({ ...prev, [id]: isCompleted }));
         try {
-            // Optimistic update
-            setCompletedToday(prev => ({ ...prev, [id]: isCompleted }));
             await apiClient.post(`/habits/${id}/checkin`, { completed: isCompleted });
         } catch (error) {
             console.error('Failed to check in habit', error);
-            // Revert optimistic update
+            // Revert optimistic update on failure
             setCompletedToday(prev => ({ ...prev, [id]: currentlyCompleted }));
         }
     };
@@ -127,7 +133,8 @@ const Habits = () => {
                                     </div>
                                     <button
                                         onClick={() => archiveHabit(habit._id)}
-                                        className="p-2 -mr-2 -mt-2 text-textMuted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                        aria-label={`Archive ${habit.name}`}
+                                        className="p-2 -mr-2 -mt-2 text-textMuted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -139,6 +146,7 @@ const Habits = () => {
                                     </span>
                                     <button
                                         onClick={() => handleCheckin(habit._id, isDone)}
+                                        aria-label={isDone ? `Uncheck ${habit.name}` : `Check in ${habit.name}`}
                                         className={cn(
                                             "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300",
                                             isDone

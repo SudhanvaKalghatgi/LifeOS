@@ -45,3 +45,18 @@ export const getHabitLogsInRange = async ({ userId, habitId, from, to }) => {
     date: { $gte: from, $lte: to },
   }).sort({ date: 1 });
 };
+
+/**
+ * Get all habit logs for a specific date (used to seed today's completions)
+ */
+export const getTodayLogs = async ({ userId, date }) => {
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(date);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  return HabitLog.find({
+    userId,
+    date: { $gte: dayStart, $lte: dayEnd },
+  });
+};

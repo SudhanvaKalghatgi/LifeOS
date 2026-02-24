@@ -166,7 +166,7 @@ const Expenses = () => {
                                         {expense.paymentMethod}
                                     </div>
                                 </div>
-                                <button onClick={() => archiveExpense(expense._id)} className="p-2 ml-2 text-textMuted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                <button onClick={() => archiveExpense(expense._id)} aria-label="Archive expense" className="p-2 ml-2 text-textMuted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100">
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>

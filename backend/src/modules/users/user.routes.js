@@ -5,7 +5,7 @@ import { syncUser, getMe, updateMe } from "./user.controller.js";
 
 const router = Router();
 
-// DEV AUTH (replace with Clerk later)
+
 router.use(requireAuth);
 
 router.post("/sync", syncUser);

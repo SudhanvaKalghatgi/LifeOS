@@ -12,7 +12,8 @@ export const triggerWeeklyReport = asyncHandler(async (req, res) => {
   const userId = req.user?.userId;
   if (!userId) throw new ApiError(401, "Unauthorized");
 
-  console.log(`🧠 [Direct] Generating weekly report for user: ${userId}`);
+  const maskedId = `${userId.slice(0, 4)}***`;
+  console.log(`🧠 [Direct] Generating weekly report for user: ${maskedId}`);
 
   const report = await generateWeeklyReport(userId);
 

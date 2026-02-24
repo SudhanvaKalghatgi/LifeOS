@@ -8,6 +8,7 @@ import {
   archiveHabitController,
   habitCheckinController,
   habitStatsController,
+  getTodayLogsController,
 } from "./habit.controller.js";
 
 const router = Router();
@@ -17,6 +18,7 @@ router.use(requireAuth);
 
 router.post("/", createHabitController);
 router.get("/", listHabitsController);
+router.get("/today", getTodayLogsController);
 
 router.patch("/:id", updateHabitController);
 router.patch("/:id/archive", archiveHabitController);
