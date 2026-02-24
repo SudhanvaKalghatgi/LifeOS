@@ -9,6 +9,7 @@
     "worker": "node src/automation/workers/index.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bullmq": "^5.67.2",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.6",

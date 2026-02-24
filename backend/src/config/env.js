@@ -13,4 +13,5 @@ export const ENV = {
   // 🔥 Automation / Redis
   ENABLE_AUTOMATION: process.env.ENABLE_AUTOMATION === "true",
   REDIS_URL: process.env.REDIS_URL || "",
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY
 };

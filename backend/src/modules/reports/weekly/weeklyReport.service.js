@@ -3,6 +3,7 @@ import { WeeklyReport } from "./weeklyReport.model.js";
 import { Task } from "../../tasks/task.model.js";
 import { HabitLog } from "../../habits/habitLog.model.js";
 import { Expense } from "../../expenses/expense.model.js";
+import { generateWeeklyAIInsights } from "./weeklyReport.ai.js";
 
 /**
  * Get start and end of last 7 days
@@ -148,25 +149,47 @@ export const generateWeeklyReport = async (userId) => {
     productivityScore,
   };
 
-  /*
-   * ATOMIC UPSERT (prevents duplicate key race condition)
-   */
-  const report = await WeeklyReport.findOneAndUpdate(
-    {
-      userId,
-      periodStart: start,
-      periodEnd: end,
-    },
-    {
-      $setOnInsert: reportData,
-    },
-    {
-      upsert: true,
-      new: true,
-    }
-  );
+/*
+ * ATOMIC UPSERT (prevents duplicate key race condition)
+ */
 
-  return report;
+let report = await WeeklyReport.findOneAndUpdate(
+  {
+    userId,
+    periodStart: start,
+    periodEnd: end,
+  },
+  {
+    $setOnInsert: reportData,
+  },
+  {
+    upsert: true,
+    new: true,
+  }
+);
+
+/*
+ * Generate AI insights ONLY if not already present
+ */
+  if (!report.aiInsights) {
+
+  console.log(`🤖 Generating AI insights for user: ${userId}`);
+
+  const aiInsights = await generateWeeklyAIInsights(report);
+
+  if (aiInsights) {
+
+    report.aiInsights = aiInsights;
+
+    await report.save();
+
+    console.log(`✅ AI insights generated for user: ${userId}`);
+
+  }
+
+}
+
+return report;
 };
 
 /**
